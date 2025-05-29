@@ -1,6 +1,5 @@
 const { Resend } = require('resend');
-import * as dotenv from 'dotenv';
-dotenv.config();
+
 exports.handler = async (event) => {
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
