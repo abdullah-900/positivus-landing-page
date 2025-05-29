@@ -1,0 +1,45 @@
+---
+import SectionHeading from "./SectionHeading.astro";
+import WorkingProcess from "./WorkingProcess.jsx";
+const data = [
+    {
+    number: "01",
+    heading: "Consultation",
+    content: "During the initial consultation, we will discuss your business goals and objectives, target audience, and current marketing efforts. This will allow us to understand your needs and tailor our services to best fit your requirements." 
+    },
+  {
+    number: "02",
+    heading: "Research and Strategy Development",
+    content: "We analyze your market, audience, and competitors to create a clear, goal-driven strategy tailored to your needs."
+  },
+  {
+    number: "03",
+    heading: "Implementation",
+    content: "We put the strategy into action through focused execution—whether it's launching campaigns, content, or new features."
+  },
+  {
+    number: "04",
+    heading: "Monitoring and Optimization",
+    content: "We track key metrics, identify what's working, and make real-time adjustments to improve performance."
+  },
+  {
+    number: "05",
+    heading: "Reporting and Communication",
+    content: "We keep you updated with clear reports and regular check-ins to ensure transparency and alignment."
+  },
+  {
+    number: "06",
+    heading: "Continual Improvement",
+    content: "We continuously refine and enhance the process based on results, feedback, and evolving goals."
+  }
+];
+
+---
+
+<section class="flex flex-col gap-[30px] xl:px-25 mb-25">
+    <SectionHeading heading="Our Working Process" content="Step-by-Step Guide to Achieving Your Business Goals"/>
+{data.map((obj)=>(
+    <WorkingProcess client:load number={obj.number}  heading={obj.heading}  content={obj.content}/>
+))}
+
+</section>

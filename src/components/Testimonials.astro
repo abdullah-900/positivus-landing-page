@@ -1,0 +1,177 @@
+---
+import SectionHeading from "./SectionHeading.astro";
+import StarIcon from "./starIcon.astro";
+import Testimonial from "./Testimonial.astro";
+const testimonials=[
+  {
+    "name": "John Smith",
+    "position": "CEO and Founder",
+    "testimonial": "John is a visionary leader whose deep expertise in digital marketing has been instrumental in shaping our company’s strategy. His comprehensive knowledge in SEO, PPC, and content strategy enables him to drive growth and innovation across all departments. Working with John is both inspiring and empowering."
+  },
+  {
+    "name": "Jane Doe",
+    "position": "Director of Operations",
+    "testimonial": "Jane has an exceptional ability to lead teams with clarity and confidence. Her strong background in project management and communication allows her to coordinate complex operations smoothly. She is the backbone of our organizational structure, ensuring every project runs efficiently and effectively."
+  },
+  {
+    "name": "Michael Brown",
+    "position": "Senior SEO Specialist",
+    "testimonial": "Michael’s attention to detail and strategic mindset make him an outstanding SEO expert. His ability to uncover keyword opportunities and implement effective on-page optimization has significantly boosted our online visibility. He consistently delivers measurable results and valuable insights."
+  },
+  {
+    "name": "Emily Johnson",
+    "position": "PPC Manager",
+    "testimonial": "Emily brings unmatched precision and analytical skills to our paid advertising efforts. Her talent in campaign management and performance analysis has helped maximize ROI across multiple channels. She is a reliable expert who continually fine-tunes strategies to meet and exceed goals."
+  },
+  {
+    "name": "Brian Williams",
+    "position": "Social Media Specialist",
+    "testimonial": "Brian has a keen sense of audience engagement and brand voice. His content strategies and metric-driven approach have brought measurable improvements in our social media presence. He’s creative, dependable, and always stays ahead of the curve with the latest trends."
+  },
+  {
+    "name": "Sarah Kim",
+    "position": "Content Creator",
+    "testimonial": "Sarah’s flair for writing and editing shines through in every piece she creates. Her SEO-optimized content not only resonates with readers but also aligns perfectly with our digital marketing goals. She’s a thoughtful storyteller who brings real value to our content efforts."
+  }
+]
+---
+
+<section class="xl:px-25 flex flex-col gap-10 xl:mb-35 mb-6">
+<SectionHeading heading="Testimonials" content="Hear from Our Satisfied Clients: Read Our Testimonials to Learn More about Our Digital Marketing Services"/>
+<div class="rounded-[45px] bg-primary w-[91%] xl:w-full m-auto p-6">
+<div class=" md:w-[600px] w-[270px] h-[550px] md:h-[400px] m-auto overflow-hidden relative">
+    <div class="flex w-max wrapper h-full absolute left-0 top-0">
+        {testimonials.map((testimonial)=>(
+            <Testimonial name={testimonial.name} position={testimonial.position} testimonial={testimonial.testimonial} />
+        ))}
+    </div>
+</div>
+<div class="flex justify-around  xl:justify-center xl:gap-45 w-full py-5">
+<button class="cursor-pointer previous" type="button" aria-label="Previous testimonial">
+<svg  width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="prevSvg" d="M22 13.5C22.8284 13.5 23.5 12.8284 23.5 12C23.5 11.1716 22.8284 10.5 22 10.5L22 13.5ZM0.939341 10.9393C0.353554 11.5251 0.353554 12.4749 0.93934 13.0607L10.4853 22.6066C11.0711 23.1924 12.0208 23.1924 12.6066 22.6066C13.1924 22.0208 13.1924 21.0711 12.6066 20.4853L4.12132 12L12.6066 3.51472C13.1924 2.92893 13.1924 1.97918 12.6066 1.3934C12.0208 0.807611 11.0711 0.807611 10.4853 1.3934L0.939341 10.9393ZM22 10.5L2 10.5L2 13.5L22 13.5L22 10.5Z" fill="white" fill-opacity="0.3"/>
+</svg>
+</button>
+<div id="indicatorsContainer" class="flex indicatorsContainer items-center gap-[19px]">
+
+</div>
+<button class="cursor-pointer next" type="button" aria-label="Next testimonial">
+<svg  width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="nextSvg" d="M2 10.5C1.17157 10.5 0.5 11.1716 0.5 12C0.5 12.8284 1.17157 13.5 2 13.5L2 10.5ZM23.0607 13.0607C23.6464 12.4749 23.6464 11.5251 23.0607 10.9393L13.5147 1.3934C12.9289 0.807613 11.9792 0.807613 11.3934 1.3934C10.8076 1.97919 10.8076 2.92893 11.3934 3.51472L19.8787 12L11.3934 20.4853C10.8076 21.0711 10.8076 22.0208 11.3934 22.6066C11.9792 23.1924 12.9289 23.1924 13.5147 22.6066L23.0607 13.0607ZM2 13.5L22 13.5L22 10.5L2 10.5L2 13.5Z" fill="white"/>
+</svg>
+</button>
+</div>
+</div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded' , function() {
+ const domElements = {
+    wrapper: document.querySelector('.wrapper'),
+    previous: document.querySelector('.previous'),
+    next: document.querySelector('.next'),
+    prevSvg: document.getElementById("prevSvg"),
+    nextSvg: document.getElementById('nextSvg'),
+    indicatorsContainer: document.getElementById('indicatorsContainer'),
+    slide:document.querySelector('.slide'),
+  };
+let currentSlide=0;
+const totalSlides=domElements.wrapper?.childElementCount;
+const slideWidth=domElements.slide?.offsetWidth;
+
+function createStarIcon() {
+const svgNS = "http://www.w3.org/2000/svg";
+const svg = document.createElementNS(svgNS, "svg");
+svg.classList.add('indicator')
+svg.setAttribute("width", "14");
+svg.setAttribute("height", "14");
+svg.setAttribute("viewBox", "0 0 14 14");
+svg.setAttribute("fill", "none");
+svg.setAttribute("xmlns", svgNS);
+const path = document.createElementNS(svgNS, "path");
+path.setAttribute("d", "M7.0099 2.05941L14 0L11.9604 7.0099L14 14L7.0099 11.9604L0 14L2.05941 7.0099L0 0L7.0099 2.05941Z");
+path.setAttribute("fill", "white");
+svg.appendChild(path);
+return svg;
+}
+
+function createIndicators() {
+    for (let i=0;i<totalSlides;i++) {
+        const svg=createStarIcon();
+        svg.dataset.slide=i;
+        svg.addEventListener('click', function() {
+            const targetSlide = parseInt(this.dataset.slide);
+            goToSlide(targetSlide);
+        })
+        domElements.indicatorsContainer?.appendChild(svg);
+    }
+}
+
+    function checkIndicationsState() {
+        const indicators=document.querySelectorAll(".indicator");
+        console.log(indicators);
+        indicators.forEach((indicator)=>{
+            if (parseInt(indicator.dataset.slide)!==currentSlide) {
+
+                    const path = indicator.querySelector("path")
+                    path?.setAttribute('fill','white')
+
+            }else {
+                const path = indicator.querySelector("path")
+                        path?.setAttribute('fill','#B9FF66')
+            
+            }
+        })
+    }
+function goToSlide(targetSlide) {
+    if (targetSlide>=0 && targetSlide<totalSlides) {
+    currentSlide=targetSlide;
+    updateSlides();
+    }
+}
+createIndicators();
+function updateButtonState() {
+    if (currentSlide===0) {
+        domElements.prevSvg?.setAttribute('fill-opacity', '0.3');
+        domElements.nextSvg?.removeAttribute('fill-opacity');
+
+    }
+    if(currentSlide>0) {
+        domElements.prevSvg?.removeAttribute('fill-opacity');
+        domElements.nextSvg?.removeAttribute('fill-opacity');
+    }
+
+    if (currentSlide===totalSlides-1) {
+        domElements.nextSvg?.setAttribute('fill-opacity', '0.3');
+        domElements.prevSvg?.removeAttribute('fill-opacity');
+    }
+}
+
+function updateSlides() {
+const newPosition = -(currentSlide * slideWidth);
+domElements.wrapper.style.left=newPosition + "px";
+updateButtonState();
+checkIndicationsState();
+}
+
+function nextSlide() {
+    if (currentSlide<totalSlides-1) {
+        currentSlide++
+        updateSlides()
+        
+    }
+}
+function prevSlide() {
+    if (currentSlide>0) {
+        currentSlide--
+        updateSlides()
+    }
+}
+updateSlides()
+domElements.next?.addEventListener('click',nextSlide);
+domElements.previous?.addEventListener('click',prevSlide)
+    
+
+  })
+
+</script>

@@ -1,0 +1,62 @@
+---
+import SectionHeading from "./SectionHeading.astro";
+import illustraion from "../assets/formillustration.svg?url";
+import Button from "./Button.astro";
+---
+
+<section class="xl:mb-25 mb-10">
+<SectionHeading heading="Contact Us" content="Connect with Us: Let's Discuss Your Digital Marketing Needs"/>
+<div class="xl:flex xl:justify-around xl:items-center xl:gap-4 rounded-[45px] w-[90%] m-auto px-6 pt-[60px] pb-[80px] xl:px-25 bg-background">
+    <form id="myForm" method="post" class="flex flex-col gap-10 max-w-[556px] xl:w-full">
+        <div class="flex justify-around items-center">
+            <div class="flex items-center gap-4">
+                <input name="action" value="Say Hi" id="Say Hi" type="radio"/>
+                <label class="cursor-pointer" for="Say Hi">Say Hi</label>
+            </div>
+            <div class="flex items-center gap-4">
+                <input name="action" value="Get a Quote" id="Get a Quote" type="radio"/>
+                <label class="cursor-pointer" for="Get a Quote">Get a Quote</label>
+            </div>
+    
+        </div>
+        <div class="flex flex-col gap-6">
+       <div class="flex flex-col gap-[5px]">
+         <label for="name">Name</label>
+        <input class="px-8 py-[18px] border rounded-[14px] w-full bg-text-light" placeholder="Name" id="name" name="name" type="text">
+       </div>
+        <div class="flex flex-col gap-[5px]">
+            <label for="email">Email*</label>
+            <input class="px-8 py-[18px] border rounded-[14px] w-full bg-text-light" placeholder="Email" id="email" name="email" type="email">
+        </div>
+        <div class="flex flex-col gap-[5px]">
+            <label for="message">Message*</label>
+            <textarea class="px-8 py-[18px] border rounded-[14px] w-full bg-text-light" placeholder="Message" name="message" id="message"></textarea>
+        </div>
+    </div>
+    <Button type="submit"  content="Send Message"/>
+</form>
+    <img class="xl:block hidden xl:max-w-[55%]" src={illustraion} alt="form section illustraion">
+</div>
+</section>
+
+<script type="module">
+  document.getElementById('myForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); // prevent normal form submit
+    const form = e.target;
+    const formData = new FormData(form);
+    // Convert FormData to plain JS object
+    const jsonObject = Object.fromEntries(formData.entries());
+    try {
+      const response = await fetch('/.netlify/functions/sendEmail', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonObject)
+      });
+      const data = await response.json();
+    } catch (err) {
+      console.error('Request failed:', err);
+    }
+  });
+</script>

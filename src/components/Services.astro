@@ -1,0 +1,23 @@
+---
+import ServiceCard from "./ServiceCard.astro"
+import blacklinkIcon from "../assets/link-icon-black.svg?url"
+import whitelinkIcon from "../assets/link-icon-white.svg?url"
+import search from "../assets/tokyo-magnifier.svg?url"
+import ad from "../assets/ad.svg?url"
+import social from "../assets/social.svg?url"
+import email from "../assets/email.svg?url"
+import content from "../assets/content.svg?url"
+import analysis from "../assets/analysis.svg?url"
+import SectionHeading from "./SectionHeading.astro"
+---
+<section class="xl:px-25  p-5 w-full flex flex-col items-center justify-center gap-10  xl:gap-20 xl:mb-25 mb-7 md:mb-14">
+<SectionHeading heading="Services" content ="At our digital marketing agency, we offer a range of services to help businesses grow and succeed online. These services include:" />
+<div class="lg:grid lg:grid-cols-2 lg:gap-5 flex flex-col gap-5">
+<ServiceCard firstTitle="Search engine" secondTitle="optimization" bgcolor="bg-background" textbgcolor="bg-secondary"textColor="text-text" icon={blacklinkIcon} image = {search} />
+<ServiceCard firstTitle="Pay-per-click" secondTitle="advertising" bgcolor="bg-secondary" textbgcolor="bg-text-light" textColor="text-text" icon={blacklinkIcon} image={ad}  />
+<ServiceCard firstTitle="Social Media" secondTitle="Marketing" bgcolor="bg-primary" textbgcolor="bg-text-light" textColor="text-text-light" icon={whitelinkIcon} image={social} />
+<ServiceCard firstTitle="Email" secondTitle="Marketing" bgcolor="bg-background" textbgcolor="bg-secondary" textColor="text-text" icon={blacklinkIcon} image={email} />
+<ServiceCard firstTitle="Content" secondTitle="Creation" bgcolor="bg-secondary"  textbgcolor="bg-text-light" textColor="text-text" icon={blacklinkIcon} image={content} />
+<ServiceCard firstTitle="Analytics and " secondTitle="Tracking" bgcolor="bg-primary" textbgcolor="bg-secondary"  textColor="text-text-light" icon={whitelinkIcon} image={analysis} />
+</div>
+</section>

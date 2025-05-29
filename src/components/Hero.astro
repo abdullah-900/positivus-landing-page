@@ -1,0 +1,24 @@
+---
+import hero from "../assets/hero.png?url"
+import Button from "./Button.astro"
+---
+<!-- mobile view -->
+<section class="lg:hidden gap-8 xl:gap-0 p-8  flex flex-col items-center justify-center lg:flex-row mb-8  lg:mb-[4.375rem]">
+<h1>Navigating the digital landscape for success</h1>
+<img class="md:w-[37.5rem] md:h-[32.1875rem]" src={hero} alt="hero illustraion">
+<p>Our digital marketing agency helps businesses grow and succeed online through a range of services including SEO, PPC, social media marketing, and content creation.</p>
+<Button content="Book a consultation"/>
+</section>
+
+
+<!-- tablet , Desktop view -->
+
+<section class="hidden xl:px-25 lg:px-8 lg:flex flex-col items-center justify-center lg:flex-row mb-8  lg:mb-[4.375rem]">
+<div class="flex items-start justify-start flex-col gap-[2.1875rem]">
+    <h1 >Navigating the digital landscape for success</h1>
+    <img class="md:w-[37.5rem] md:h-[32.1875rem] md:hidden" src={hero} alt="hero illustraion">
+<p>Our digital marketing agency helps businesses grow and succeed online through a range of services including SEO, PPC, social media marketing, and content creation.</p>
+<Button content="Book a consultation"/>
+</div>
+<img class="hidden md:block md:w-[37.5rem] md:h-[32.1875rem]" src={hero} alt="hero illustraion">
+</section>

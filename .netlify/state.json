@@ -1,0 +1,19 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Ismailia",
+			"country": {
+				"code": "EG",
+				"name": "Egypt"
+			},
+			"subdivision": {
+				"code": "IS",
+				"name": "Ismailia Governorate"
+			},
+			"timezone": "Africa/Cairo",
+			"latitude": 30.6046,
+			"longitude": 32.2759
+		},
+		"timestamp": 1748026298797
+	}
+}

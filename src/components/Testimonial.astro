@@ -1,0 +1,12 @@
+---
+const {name,position,testimonial}=Astro.props;
+---
+<div class="flex flex-col gap-8 slide justify-center items-center xl:items-start w-[270px] md:w-[600px] text-text-light py-4 md:py-[76px]">
+    <div class="rounded-[45px] border-2 border-secondary  relative bubble p-8">
+    <p>{testimonial}</p>
+    </div>
+    <div class="xl:w-full xl:ml-15">
+        <h4 class="text-secondary">{name}</h4>
+        <p>{position}</p>
+    </div>
+</div>

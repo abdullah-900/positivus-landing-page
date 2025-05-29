@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+@import "tailwindcss";
+
+@theme {
+    --color-primary:#191A23;
+    --color-secondary:#B9FF66;
+    --color-background:#F3F3F3;
+    --color-text:#000000;
+    --color-text-light:#ffffff;
+    --color-subcripebg:#292A32;
+    --font-space-grotesk:"Space Grotesk", sans-serif;
+    --shadow-base:0 5px 0px 0px rgba(25,26,35,1);
+} 
+ input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 28px;
+    height: 28px;
+    border: 1px solid black;
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+  }
+
+  input[type="radio"]:checked::before {
+    content: '';
+    display: block;
+    width: 16px;
+    height: 16px;
+    background-color: #B9FF66;
+    border-radius: 50%;
+    position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  }
+
+  @layer base {
+  h1 {
+    font-size: 60px;
+    font-weight: 500;
+  }
+  h2 {
+    font-size: 40px;
+    font-weight: 500;
+  }
+    h3 {
+    font-size: 30px;
+    font-weight: 500;
+  }
+    h4 {
+    font-size: 20px;
+    font-weight: 500;
+  }
+  p{
+    font-size: 18px;
+    font-weight: 400;
+  }
+
+  @media (max-width:640px) {
+      h1 {
+    font-size: 43px;
+    font-weight: 500;
+  }
+  h2 {
+    font-size: 36px;
+    font-weight: 500;
+  }
+    h3 {
+    font-size: 26px;
+    font-weight: 500;
+  }
+    h4 {
+    font-size: 18px;
+    font-weight: 500;
+  }
+  p{
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+  }
+  }
+}
+
+   .bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -23px;
+            left: 40px;
+            width: 0;
+            height: 0;
+            border-left: 23px solid transparent;
+            border-right: 23px solid transparent;
+            border-top: 23px solid #B9FF66;
+        }
+
+        .bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            left: 43px;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 20px solid #191A23;
+            z-index: 1;
+        }

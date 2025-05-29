@@ -1,0 +1,6 @@
+---
+const {content, className,type="button"}=Astro.props;
+---
+<button type={type} class={`cursor-pointer rounded-[.875rem] px-6 py-3.5 text-[20px] leading-[28px] lg:px-[35px] lg:py-5 text-text-light bg-primary ${className}`}>
+{content}
+</button>

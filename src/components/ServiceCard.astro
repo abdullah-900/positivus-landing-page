@@ -1,0 +1,18 @@
+---
+const { firstTitle,secondTitle, bgcolor, textbgcolor,textColor, icon, image  } = Astro.props;
+---
+
+<div class={`justify-around shadow-base w-full p-[50px] md:flex items-center rounded-[2.8125rem] border ${bgcolor} border-primary`}>
+<div class="flex flex-col  items-start justify-center gap-10 xl:gap-[5.8125rem]">
+<div class="text-[1.875rem] font-medium ">
+       <h3 class={`${textbgcolor} rounded-[.4375rem]  w-fit px-[.4375rem]`}>{firstTitle}</h3>
+   <h3 class={`${textbgcolor} rounded-[.4375rem]  w-fit px-[.4375rem]`}>{secondTitle}</h3>
+</div>
+   <div class="flex items-center  justify-between w-full md:w-[10rem] md:justify-around">
+    <img class="w-[2.5625rem] h-[2.5625rem] self-end md:self-center" src={icon} alt="learn more icon">
+    <p class={`hidden md:block ${textColor}`}>Learn more</p>
+ <img class="w-[8.9rem] h-[7rem] md:w-[13.125rem] md:h-[10.375rem]  md:hidden" src={image} alt="tokyo magnifier illustraion">
+   </div>
+</div>
+ <img class="md:w-[13.125rem] md:h-[10.375rem] hidden md:block" src={image} alt="tokyo magnifier illustraion">
+</div>
