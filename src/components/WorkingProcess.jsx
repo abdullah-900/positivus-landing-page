@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import plusIcon from '../assets/plus icon.svg?url';
+import plusIcon from '../assets/Plus icon.svg?url';
 import minusIcon from "../assets/minus icon.svg?url";
 
 const WorkingProcess = ({number ,heading, content}) => {
@@ -34,7 +34,7 @@ const WorkingProcess = ({number ,heading, content}) => {
         <h3>{heading}</h3>
     </div>
     <button onClick={handleClick}>
-      <img className='cursor-pointer w-[30px] h-[30px] xl:w-[58px] xl:h-[58px]' src={plusIcon} alt="plus icon" />
+      <img className='cursor-pointer w-[30px] h-[30px] xl:w-[58px] xl:h-[58px]' src={plusIcon} alt="Plus icon" />
     </button>
 </div>
   )
