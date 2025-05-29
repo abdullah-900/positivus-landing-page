@@ -31,6 +31,341 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
+// node_modules/dotenv/package.json
+var require_package = __commonJS({
+  "node_modules/dotenv/package.json"(exports2, module2) {
+    module2.exports = {
+      name: "dotenv",
+      version: "16.5.0",
+      description: "Loads environment variables from .env file",
+      main: "lib/main.js",
+      types: "lib/main.d.ts",
+      exports: {
+        ".": {
+          types: "./lib/main.d.ts",
+          require: "./lib/main.js",
+          default: "./lib/main.js"
+        },
+        "./config": "./config.js",
+        "./config.js": "./config.js",
+        "./lib/env-options": "./lib/env-options.js",
+        "./lib/env-options.js": "./lib/env-options.js",
+        "./lib/cli-options": "./lib/cli-options.js",
+        "./lib/cli-options.js": "./lib/cli-options.js",
+        "./package.json": "./package.json"
+      },
+      scripts: {
+        "dts-check": "tsc --project tests/types/tsconfig.json",
+        lint: "standard",
+        pretest: "npm run lint && npm run dts-check",
+        test: "tap run --allow-empty-coverage --disable-coverage --timeout=60000",
+        "test:coverage": "tap run --show-full-coverage --timeout=60000 --coverage-report=lcov",
+        prerelease: "npm test",
+        release: "standard-version"
+      },
+      repository: {
+        type: "git",
+        url: "git://github.com/motdotla/dotenv.git"
+      },
+      homepage: "https://github.com/motdotla/dotenv#readme",
+      funding: "https://dotenvx.com",
+      keywords: [
+        "dotenv",
+        "env",
+        ".env",
+        "environment",
+        "variables",
+        "config",
+        "settings"
+      ],
+      readmeFilename: "README.md",
+      license: "BSD-2-Clause",
+      devDependencies: {
+        "@types/node": "^18.11.3",
+        decache: "^4.6.2",
+        sinon: "^14.0.1",
+        standard: "^17.0.0",
+        "standard-version": "^9.5.0",
+        tap: "^19.2.0",
+        typescript: "^4.8.4"
+      },
+      engines: {
+        node: ">=12"
+      },
+      browser: {
+        fs: false
+      }
+    };
+  }
+});
+
+// node_modules/dotenv/lib/main.js
+var require_main = __commonJS({
+  "node_modules/dotenv/lib/main.js"(exports2, module2) {
+    var fs2 = require("fs");
+    var path = require("path");
+    var os2 = require("os");
+    var crypto = require("crypto");
+    var packageJson = require_package();
+    var version = packageJson.version;
+    var LINE = /(?:^|^)\s*(?:export\s+)?([\w.-]+)(?:\s*=\s*?|:\s+?)(\s*'(?:\\'|[^'])*'|\s*"(?:\\"|[^"])*"|\s*`(?:\\`|[^`])*`|[^#\r\n]+)?\s*(?:#.*)?(?:$|$)/mg;
+    function parse(src) {
+      const obj = {};
+      let lines = src.toString();
+      lines = lines.replace(/\r\n?/mg, "\n");
+      let match;
+      while ((match = LINE.exec(lines)) != null) {
+        const key = match[1];
+        let value = match[2] || "";
+        value = value.trim();
+        const maybeQuote = value[0];
+        value = value.replace(/^(['"`])([\s\S]*)\1$/mg, "$2");
+        if (maybeQuote === '"') {
+          value = value.replace(/\\n/g, "\n");
+          value = value.replace(/\\r/g, "\r");
+        }
+        obj[key] = value;
+      }
+      return obj;
+    }
+    function _parseVault(options) {
+      const vaultPath = _vaultPath(options);
+      const result = DotenvModule.configDotenv({ path: vaultPath });
+      if (!result.parsed) {
+        const err = new Error(`MISSING_DATA: Cannot parse ${vaultPath} for an unknown reason`);
+        err.code = "MISSING_DATA";
+        throw err;
+      }
+      const keys = _dotenvKey(options).split(",");
+      const length = keys.length;
+      let decrypted;
+      for (let i = 0; i < length; i++) {
+        try {
+          const key = keys[i].trim();
+          const attrs = _instructions(result, key);
+          decrypted = DotenvModule.decrypt(attrs.ciphertext, attrs.key);
+          break;
+        } catch (error) {
+          if (i + 1 >= length) {
+            throw error;
+          }
+        }
+      }
+      return DotenvModule.parse(decrypted);
+    }
+    function _warn(message) {
+      console.log(`[dotenv@${version}][WARN] ${message}`);
+    }
+    function _debug(message) {
+      console.log(`[dotenv@${version}][DEBUG] ${message}`);
+    }
+    function _dotenvKey(options) {
+      if (options && options.DOTENV_KEY && options.DOTENV_KEY.length > 0) {
+        return options.DOTENV_KEY;
+      }
+      if (process.env.DOTENV_KEY && process.env.DOTENV_KEY.length > 0) {
+        return process.env.DOTENV_KEY;
+      }
+      return "";
+    }
+    function _instructions(result, dotenvKey) {
+      let uri;
+      try {
+        uri = new URL(dotenvKey);
+      } catch (error) {
+        if (error.code === "ERR_INVALID_URL") {
+          const err = new Error("INVALID_DOTENV_KEY: Wrong format. Must be in valid uri format like dotenv://:key_1234@dotenvx.com/vault/.env.vault?environment=development");
+          err.code = "INVALID_DOTENV_KEY";
+          throw err;
+        }
+        throw error;
+      }
+      const key = uri.password;
+      if (!key) {
+        const err = new Error("INVALID_DOTENV_KEY: Missing key part");
+        err.code = "INVALID_DOTENV_KEY";
+        throw err;
+      }
+      const environment = uri.searchParams.get("environment");
+      if (!environment) {
+        const err = new Error("INVALID_DOTENV_KEY: Missing environment part");
+        err.code = "INVALID_DOTENV_KEY";
+        throw err;
+      }
+      const environmentKey = `DOTENV_VAULT_${environment.toUpperCase()}`;
+      const ciphertext = result.parsed[environmentKey];
+      if (!ciphertext) {
+        const err = new Error(`NOT_FOUND_DOTENV_ENVIRONMENT: Cannot locate environment ${environmentKey} in your .env.vault file.`);
+        err.code = "NOT_FOUND_DOTENV_ENVIRONMENT";
+        throw err;
+      }
+      return { ciphertext, key };
+    }
+    function _vaultPath(options) {
+      let possibleVaultPath = null;
+      if (options && options.path && options.path.length > 0) {
+        if (Array.isArray(options.path)) {
+          for (const filepath of options.path) {
+            if (fs2.existsSync(filepath)) {
+              possibleVaultPath = filepath.endsWith(".vault") ? filepath : `${filepath}.vault`;
+            }
+          }
+        } else {
+          possibleVaultPath = options.path.endsWith(".vault") ? options.path : `${options.path}.vault`;
+        }
+      } else {
+        possibleVaultPath = path.resolve(process.cwd(), ".env.vault");
+      }
+      if (fs2.existsSync(possibleVaultPath)) {
+        return possibleVaultPath;
+      }
+      return null;
+    }
+    function _resolveHome(envPath) {
+      return envPath[0] === "~" ? path.join(os2.homedir(), envPath.slice(1)) : envPath;
+    }
+    function _configVault(options) {
+      const debug = Boolean(options && options.debug);
+      if (debug) {
+        _debug("Loading env from encrypted .env.vault");
+      }
+      const parsed = DotenvModule._parseVault(options);
+      let processEnv = process.env;
+      if (options && options.processEnv != null) {
+        processEnv = options.processEnv;
+      }
+      DotenvModule.populate(processEnv, parsed, options);
+      return { parsed };
+    }
+    function configDotenv(options) {
+      const dotenvPath = path.resolve(process.cwd(), ".env");
+      let encoding = "utf8";
+      const debug = Boolean(options && options.debug);
+      if (options && options.encoding) {
+        encoding = options.encoding;
+      } else {
+        if (debug) {
+          _debug("No encoding is specified. UTF-8 is used by default");
+        }
+      }
+      let optionPaths = [dotenvPath];
+      if (options && options.path) {
+        if (!Array.isArray(options.path)) {
+          optionPaths = [_resolveHome(options.path)];
+        } else {
+          optionPaths = [];
+          for (const filepath of options.path) {
+            optionPaths.push(_resolveHome(filepath));
+          }
+        }
+      }
+      let lastError;
+      const parsedAll = {};
+      for (const path2 of optionPaths) {
+        try {
+          const parsed = DotenvModule.parse(fs2.readFileSync(path2, { encoding }));
+          DotenvModule.populate(parsedAll, parsed, options);
+        } catch (e2) {
+          if (debug) {
+            _debug(`Failed to load ${path2} ${e2.message}`);
+          }
+          lastError = e2;
+        }
+      }
+      let processEnv = process.env;
+      if (options && options.processEnv != null) {
+        processEnv = options.processEnv;
+      }
+      DotenvModule.populate(processEnv, parsedAll, options);
+      if (lastError) {
+        return { parsed: parsedAll, error: lastError };
+      } else {
+        return { parsed: parsedAll };
+      }
+    }
+    function config2(options) {
+      if (_dotenvKey(options).length === 0) {
+        return DotenvModule.configDotenv(options);
+      }
+      const vaultPath = _vaultPath(options);
+      if (!vaultPath) {
+        _warn(`You set DOTENV_KEY but you are missing a .env.vault file at ${vaultPath}. Did you forget to build it?`);
+        return DotenvModule.configDotenv(options);
+      }
+      return DotenvModule._configVault(options);
+    }
+    function decrypt(encrypted, keyStr) {
+      const key = Buffer.from(keyStr.slice(-64), "hex");
+      let ciphertext = Buffer.from(encrypted, "base64");
+      const nonce = ciphertext.subarray(0, 12);
+      const authTag = ciphertext.subarray(-16);
+      ciphertext = ciphertext.subarray(12, -16);
+      try {
+        const aesgcm = crypto.createDecipheriv("aes-256-gcm", key, nonce);
+        aesgcm.setAuthTag(authTag);
+        return `${aesgcm.update(ciphertext)}${aesgcm.final()}`;
+      } catch (error) {
+        const isRange = error instanceof RangeError;
+        const invalidKeyLength = error.message === "Invalid key length";
+        const decryptionFailed = error.message === "Unsupported state or unable to authenticate data";
+        if (isRange || invalidKeyLength) {
+          const err = new Error("INVALID_DOTENV_KEY: It must be 64 characters long (or more)");
+          err.code = "INVALID_DOTENV_KEY";
+          throw err;
+        } else if (decryptionFailed) {
+          const err = new Error("DECRYPTION_FAILED: Please check your DOTENV_KEY");
+          err.code = "DECRYPTION_FAILED";
+          throw err;
+        } else {
+          throw error;
+        }
+      }
+    }
+    function populate(processEnv, parsed, options = {}) {
+      const debug = Boolean(options && options.debug);
+      const override = Boolean(options && options.override);
+      if (typeof parsed !== "object") {
+        const err = new Error("OBJECT_REQUIRED: Please check the processEnv argument being passed to populate");
+        err.code = "OBJECT_REQUIRED";
+        throw err;
+      }
+      for (const key of Object.keys(parsed)) {
+        if (Object.prototype.hasOwnProperty.call(processEnv, key)) {
+          if (override === true) {
+            processEnv[key] = parsed[key];
+          }
+          if (debug) {
+            if (override === true) {
+              _debug(`"${key}" is already defined and WAS overwritten`);
+            } else {
+              _debug(`"${key}" is already defined and was NOT overwritten`);
+            }
+          }
+        } else {
+          processEnv[key] = parsed[key];
+        }
+      }
+    }
+    var DotenvModule = {
+      configDotenv,
+      _configVault,
+      _parseVault,
+      config: config2,
+      decrypt,
+      parse,
+      populate
+    };
+    module2.exports.configDotenv = DotenvModule.configDotenv;
+    module2.exports._configVault = DotenvModule._configVault;
+    module2.exports._parseVault = DotenvModule._parseVault;
+    module2.exports.config = DotenvModule.config;
+    module2.exports.decrypt = DotenvModule.decrypt;
+    module2.exports.parse = DotenvModule.parse;
+    module2.exports.populate = DotenvModule.populate;
+    module2.exports = DotenvModule;
+  }
+});
+
 // node_modules/domelementtype/lib/esm/index.js
 function isTag(elem) {
   return elem.type === ElementType.Tag || elem.type === ElementType.Script || elem.type === ElementType.Style;
@@ -6010,15 +6345,15 @@ var require_react_production = __commonJS({
         return fn3.apply(null, arguments);
       };
     };
-    exports2.cloneElement = function(element, config, children) {
+    exports2.cloneElement = function(element, config2, children) {
       if (null === element || void 0 === element)
         throw Error(
           "The argument must be a React element, but you passed " + element + "."
         );
       var props = assign({}, element.props), key = element.key, owner = void 0;
-      if (null != config)
-        for (propName in void 0 !== config.ref && (owner = void 0), void 0 !== config.key && (key = "" + config.key), config)
-          !hasOwnProperty.call(config, propName) || "key" === propName || "__self" === propName || "__source" === propName || "ref" === propName && void 0 === config.ref || (props[propName] = config[propName]);
+      if (null != config2)
+        for (propName in void 0 !== config2.ref && (owner = void 0), void 0 !== config2.key && (key = "" + config2.key), config2)
+          !hasOwnProperty.call(config2, propName) || "key" === propName || "__self" === propName || "__source" === propName || "ref" === propName && void 0 === config2.ref || (props[propName] = config2[propName]);
       var propName = arguments.length - 2;
       if (1 === propName) props.children = children;
       else if (1 < propName) {
@@ -6044,11 +6379,11 @@ var require_react_production = __commonJS({
       };
       return defaultValue;
     };
-    exports2.createElement = function(type, config, children) {
+    exports2.createElement = function(type, config2, children) {
       var propName, props = {}, key = null;
-      if (null != config)
-        for (propName in void 0 !== config.key && (key = "" + config.key), config)
-          hasOwnProperty.call(config, propName) && "key" !== propName && "__self" !== propName && "__source" !== propName && (props[propName] = config[propName]);
+      if (null != config2)
+        for (propName in void 0 !== config2.key && (key = "" + config2.key), config2)
+          hasOwnProperty.call(config2, propName) && "key" !== propName && "__self" !== propName && "__source" !== propName && (props[propName] = config2[propName]);
       var childrenLength = arguments.length - 2;
       if (1 === childrenLength) props.children = children;
       else if (1 < childrenLength) {
@@ -6295,12 +6630,12 @@ var require_react_development = __commonJS({
       function UnknownOwner() {
         return Error("react-stack-top-frame");
       }
-      function hasValidKey(config) {
-        if (hasOwnProperty.call(config, "key")) {
-          var getter = Object.getOwnPropertyDescriptor(config, "key").get;
+      function hasValidKey(config2) {
+        if (hasOwnProperty.call(config2, "key")) {
+          var getter = Object.getOwnPropertyDescriptor(config2, "key").get;
           if (getter && getter.isReactWarning) return false;
         }
-        return void 0 !== config.key;
+        return void 0 !== config2.key;
       }
       function defineKeyPropWarningGetter(props, displayName) {
         function warnAboutAccessingKey() {
@@ -6833,28 +7168,28 @@ var require_react_development = __commonJS({
         var getCurrentStack = ReactSharedInternals.getCurrentStack;
         return null === getCurrentStack ? null : getCurrentStack();
       };
-      exports2.cloneElement = function(element, config, children) {
+      exports2.cloneElement = function(element, config2, children) {
         if (null === element || void 0 === element)
           throw Error(
             "The argument must be a React element, but you passed " + element + "."
           );
         var props = assign({}, element.props), key = element.key, owner = element._owner;
-        if (null != config) {
+        if (null != config2) {
           var JSCompiler_inline_result;
           a: {
-            if (hasOwnProperty.call(config, "ref") && (JSCompiler_inline_result = Object.getOwnPropertyDescriptor(
-              config,
+            if (hasOwnProperty.call(config2, "ref") && (JSCompiler_inline_result = Object.getOwnPropertyDescriptor(
+              config2,
               "ref"
             ).get) && JSCompiler_inline_result.isReactWarning) {
               JSCompiler_inline_result = false;
               break a;
             }
-            JSCompiler_inline_result = void 0 !== config.ref;
+            JSCompiler_inline_result = void 0 !== config2.ref;
           }
           JSCompiler_inline_result && (owner = getOwner());
-          hasValidKey(config) && (checkKeyStringCoercion(config.key), key = "" + config.key);
-          for (propName in config)
-            !hasOwnProperty.call(config, propName) || "key" === propName || "__self" === propName || "__source" === propName || "ref" === propName && void 0 === config.ref || (props[propName] = config[propName]);
+          hasValidKey(config2) && (checkKeyStringCoercion(config2.key), key = "" + config2.key);
+          for (propName in config2)
+            !hasOwnProperty.call(config2, propName) || "key" === propName || "__self" === propName || "__source" === propName || "ref" === propName && void 0 === config2.ref || (props[propName] = config2[propName]);
         }
         var propName = arguments.length - 2;
         if (1 === propName) props.children = children;
@@ -6896,18 +7231,18 @@ var require_react_development = __commonJS({
         defaultValue._currentRenderer2 = null;
         return defaultValue;
       };
-      exports2.createElement = function(type, config, children) {
+      exports2.createElement = function(type, config2, children) {
         for (var i = 2; i < arguments.length; i++) {
           var node = arguments[i];
           isValidElement(node) && node._store && (node._store.validated = 1);
         }
         i = {};
         node = null;
-        if (null != config)
-          for (propName in didWarnAboutOldJSXRuntime || !("__self" in config) || "key" in config || (didWarnAboutOldJSXRuntime = true, console.warn(
+        if (null != config2)
+          for (propName in didWarnAboutOldJSXRuntime || !("__self" in config2) || "key" in config2 || (didWarnAboutOldJSXRuntime = true, console.warn(
             "Your app (or one of its dependencies) is using an outdated JSX transform. Update to the modern JSX transform for faster performance: https://react.dev/link/new-jsx-transform"
-          )), hasValidKey(config) && (checkKeyStringCoercion(config.key), node = "" + config.key), config)
-            hasOwnProperty.call(config, propName) && "key" !== propName && "__self" !== propName && "__source" !== propName && (i[propName] = config[propName]);
+          )), hasValidKey(config2) && (checkKeyStringCoercion(config2.key), node = "" + config2.key), config2)
+            hasOwnProperty.call(config2, propName) && "key" !== propName && "__self" !== propName && "__source" !== propName && (i[propName] = config2[propName]);
         var childrenLength = arguments.length - 2;
         if (1 === childrenLength) i.children = children;
         else if (1 < childrenLength) {
@@ -12290,21 +12625,21 @@ var require_react_jsx_runtime_production = __commonJS({
     "use strict";
     var REACT_ELEMENT_TYPE = Symbol.for("react.transitional.element");
     var REACT_FRAGMENT_TYPE = Symbol.for("react.fragment");
-    function jsxProd(type, config, maybeKey) {
+    function jsxProd(type, config2, maybeKey) {
       var key = null;
       void 0 !== maybeKey && (key = "" + maybeKey);
-      void 0 !== config.key && (key = "" + config.key);
-      if ("key" in config) {
+      void 0 !== config2.key && (key = "" + config2.key);
+      if ("key" in config2) {
         maybeKey = {};
-        for (var propName in config)
-          "key" !== propName && (maybeKey[propName] = config[propName]);
-      } else maybeKey = config;
-      config = maybeKey.ref;
+        for (var propName in config2)
+          "key" !== propName && (maybeKey[propName] = config2[propName]);
+      } else maybeKey = config2;
+      config2 = maybeKey.ref;
       return {
         $$typeof: REACT_ELEMENT_TYPE,
         type,
         key,
-        ref: void 0 !== config ? config : null,
+        ref: void 0 !== config2 ? config2 : null,
         props: maybeKey
       };
     }
@@ -12405,12 +12740,12 @@ var require_react_jsx_runtime_development = __commonJS({
       function UnknownOwner() {
         return Error("react-stack-top-frame");
       }
-      function hasValidKey(config) {
-        if (hasOwnProperty.call(config, "key")) {
-          var getter = Object.getOwnPropertyDescriptor(config, "key").get;
+      function hasValidKey(config2) {
+        if (hasOwnProperty.call(config2, "key")) {
+          var getter = Object.getOwnPropertyDescriptor(config2, "key").get;
           if (getter && getter.isReactWarning) return false;
         }
-        return void 0 !== config.key;
+        return void 0 !== config2.key;
       }
       function defineKeyPropWarningGetter(props, displayName) {
         function warnAboutAccessingKey() {
@@ -12474,8 +12809,8 @@ var require_react_jsx_runtime_development = __commonJS({
         Object.freeze && (Object.freeze(type.props), Object.freeze(type));
         return type;
       }
-      function jsxDEVImpl(type, config, maybeKey, isStaticChildren, source, self, debugStack, debugTask) {
-        var children = config.children;
+      function jsxDEVImpl(type, config2, maybeKey, isStaticChildren, source, self, debugStack, debugTask) {
+        var children = config2.children;
         if (void 0 !== children)
           if (isStaticChildren)
             if (isArrayImpl(children)) {
@@ -12487,9 +12822,9 @@ var require_react_jsx_runtime_development = __commonJS({
                 "React.jsx: Static children should always be an array. You are likely explicitly calling React.jsxs or React.jsxDEV. Use the Babel transform instead."
               );
           else validateChildKeys(children);
-        if (hasOwnProperty.call(config, "key")) {
+        if (hasOwnProperty.call(config2, "key")) {
           children = getComponentNameFromType(type);
-          var keys = Object.keys(config).filter(function(k3) {
+          var keys = Object.keys(config2).filter(function(k3) {
             return "key" !== k3;
           });
           isStaticChildren = 0 < keys.length ? "{key: someKey, " + keys.join(": ..., ") + ": ...}" : "{key: someKey}";
@@ -12503,12 +12838,12 @@ var require_react_jsx_runtime_development = __commonJS({
         }
         children = null;
         void 0 !== maybeKey && (checkKeyStringCoercion(maybeKey), children = "" + maybeKey);
-        hasValidKey(config) && (checkKeyStringCoercion(config.key), children = "" + config.key);
-        if ("key" in config) {
+        hasValidKey(config2) && (checkKeyStringCoercion(config2.key), children = "" + config2.key);
+        if ("key" in config2) {
           maybeKey = {};
-          for (var propName in config)
-            "key" !== propName && (maybeKey[propName] = config[propName]);
-        } else maybeKey = config;
+          for (var propName in config2)
+            "key" !== propName && (maybeKey[propName] = config2[propName]);
+        } else maybeKey = config2;
         children && defineKeyPropWarningGetter(
           maybeKey,
           "function" === typeof type ? type.displayName || type.name || "Unknown" : type
@@ -12546,11 +12881,11 @@ var require_react_jsx_runtime_development = __commonJS({
       var unknownOwnerDebugTask = createTask(getTaskName(UnknownOwner));
       var didWarnAboutKeySpread = {};
       exports2.Fragment = REACT_FRAGMENT_TYPE;
-      exports2.jsx = function(type, config, maybeKey, source, self) {
+      exports2.jsx = function(type, config2, maybeKey, source, self) {
         var trackActualOwner = 1e4 > ReactSharedInternals.recentlyCreatedOwnerStacks++;
         return jsxDEVImpl(
           type,
-          config,
+          config2,
           maybeKey,
           false,
           source,
@@ -12559,11 +12894,11 @@ var require_react_jsx_runtime_development = __commonJS({
           trackActualOwner ? createTask(getTaskName(type)) : unknownOwnerDebugTask
         );
       };
-      exports2.jsxs = function(type, config, maybeKey, source, self) {
+      exports2.jsxs = function(type, config2, maybeKey, source, self) {
         var trackActualOwner = 1e4 > ReactSharedInternals.recentlyCreatedOwnerStacks++;
         return jsxDEVImpl(
           type,
-          config,
+          config2,
           maybeKey,
           true,
           source,
@@ -36518,7 +36853,9 @@ var require_dist = __commonJS({
 });
 
 // netlify/functions/sendEmail.js
+var dotenv = __toESM(require_main(), 1);
 var { Resend } = require_dist();
+dotenv.config();
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     console.error("Method not allowed");
@@ -36533,18 +36870,6 @@ exports.handler = async (event) => {
     };
   }
   try {
-    if (!process.env.RESEND_API_KEY) {
-      console.error("RESEND_API_KEY not found in environment variables");
-      return {
-        statusCode: 500,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Headers": "Content-Type",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ error: "Server configuration error" })
-      };
-    }
     const resend = new Resend(process.env.RESEND_API_KEY);
     let body = {};
     if (event.body) {
@@ -36563,34 +36888,16 @@ exports.handler = async (event) => {
         };
       }
     }
-    if (!body.name || !body.email || !body.message) {
-      return {
-        statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Headers": "Content-Type",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ error: "Missing required fields: name, email, or message" })
-      };
-    }
     const { data, error } = await resend.emails.send({
-      from: "Contact Form <onboarding@resend.dev>",
-      // Use verified domain
-      to: [process.env.RECEIVER_EMAIL],
-      // Fixed typo: RECIEVER_MAIl -> RECEIVER_EMAIL
-      subject: body.action || "New Contact Form Submission",
-      html: `
-        <h2>New Contact Form Submission</h2>
-        <p><strong>From:</strong> ${body.name}</p>
-        <p><strong>Email:</strong> ${body.email}</p>
-        <p><strong>Subject:</strong> ${body.action || "No subject"}</p>
-        <p><strong>Message:</strong></p>
-        <p>${body.message}</p>
+      from: `${body.name} <no-reply@resend.dev>`,
+      to: [process.env.RECIEVER_MAIl],
+      subject: body.action,
+      html: `<strong>${body.message}</strong>
+      <p>my mail is ${body.email} please contact me </p>
       `
     });
     if (error) {
-      console.error("Failed to send email:", error);
+      console.error("Failed to send email", error);
       return {
         statusCode: 500,
         headers: {
@@ -36615,7 +36922,7 @@ exports.handler = async (event) => {
       })
     };
   } catch (error) {
-    console.error("Internal server error:", error.message);
+    console.error("Internal server error: ", error.message);
     return {
       statusCode: 500,
       headers: {
